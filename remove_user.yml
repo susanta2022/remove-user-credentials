@@ -16,7 +16,7 @@
 
     - name: del_directory
       prompt: do you want to remove full user credentials  /home/{{user_name}} directory from node ?
-      default: "no"
+      default: "yes"
       private: no
   
     
@@ -84,7 +84,7 @@
   vars_prompt:
     - name: del_directory
       prompt: do you want to remove user credentials from /home/ansadmin/.ssh/{{group}} directory ?
-      default: "no"
+      default: "yes"
       private: no
 
   vars:     
