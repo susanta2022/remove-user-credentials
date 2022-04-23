@@ -95,7 +95,7 @@
         
         - name: <<<====== remove user credentials from server  =======>>>
           file:
-            path: /home/ansadmin/.ssh/{{group}}
+            path: /root/.ssh/{{group}}
             state: absent
           when: '"{{del_directory}}" in "yes"'         
           
