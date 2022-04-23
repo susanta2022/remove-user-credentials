@@ -1,0 +1,105 @@
+--- # remove user from node
+- hosts: demo
+  user: ansadmin
+  connection: ssh
+  become: true
+  gather_facts: yes
+
+
+  vars:    
+    user_name: icic
+    group: icic
+    
+    
+
+  vars_prompt:
+
+    - name: del_directory
+      prompt: do you want to remove full user credentials  /home/{{user_name}} directory from node ?
+      default: "yes"
+      private: no
+  
+    
+
+  tasks:
+        - debug:
+           msg: "{{del_directory}}"
+
+
+        - name: <<==== check user is exist or not =====>>>
+          shell: egrep -i "^{{user_name}}" /etc/passwd
+          register: user_exit
+          ignore_errors: yes
+    
+        - debug:
+            msg: "{{user_exit.stdout}}"
+  
+        - name: <<======== check user {{user_name}} for belong which group ======>>>
+          command: groups {{user_name}}
+          register: group_exit
+          ignore_errors: yes         
+ 
+          #when: '"{{group}}" in "{{user_exit.stdout}}"'
+
+        - debug:
+            msg: "{{group_exit.stdout}}"
+                
+
+        - name: << ====== remove user group =====>
+          #command: groupdel {{group}}
+          group:
+           name: '{{group}}'
+           state: absent
+           #force: true
+           #remove: true
+          notify: user exist
+          when: '"{{group}}" in "{{group_exit.stdout}}"'
+          ignore_errors: yes 
+                  
+
+        - name: <<===== remove user credentials from /home/{{user_name}}=======>>
+          file:
+            path: /home/{{user_name}}
+            state: absent 
+          when: '"{{del_directory}}" in "yes"'
+          ignore_errors: yes
+             
+         
+
+  handlers:
+          - name: user exist
+            #command: sudo userdel -f {{user}}
+            user:
+              name: "{{user_name}}"
+              state: "absent"
+              force: true
+              #remove: true
+ 
+
+          
+  
+- hosts: 127.0.0.1
+  connection: local
+
+  vars_prompt:
+    - name: del_directory
+      prompt: do you want to remove user credentials from /home/ansadmin/.ssh/{{group}} directory ?
+      default: "yes"
+      private: no
+
+  vars:     
+     group: icic    
+
+
+  tasks:
+        
+        - name: <<<====== remove user credentials from server  =======>>>
+          file:
+            path: /home/ansadmin/.ssh/{{group}}
+            state: absent
+          when: '"{{del_directory}}" in "yes"'         
+          
+
+
+
+          
